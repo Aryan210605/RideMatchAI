@@ -1,6 +1,10 @@
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const { findUserByEmail, createUser } = require("../models/userModel");
 
+// ==========================
+// Register User
+// ==========================
 const registerUser = async (req, res) => {
     try {
         const { full_name, email, password, role } = req.body;
@@ -50,6 +54,80 @@ const registerUser = async (req, res) => {
     }
 };
 
+// ==========================
+// Login User
+// ==========================
+const loginUser = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // Check required fields
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Email and Password are required"
+            });
+        }
+
+        // Find user by email
+        const user = await findUserByEmail(email);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        // Compare password
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid password"
+            });
+        }
+
+        // Generate JWT Token
+        const token = jwt.sign(
+            {
+                id: user.id,
+                role: user.role
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "7d"
+            }
+        );
+
+        // Success response
+        res.status(200).json({
+            success: true,
+            message: "Login successful",
+            token,
+            user: {
+                id: user.id,
+                full_name: user.full_name,
+                email: user.email,
+                role: user.role
+            }
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+    }
+};
+
+// ==========================
+// Export Functions
+// ==========================
 module.exports = {
     registerUser,
+    loginUser,
 };
