@@ -4,11 +4,13 @@ const express = require("express");
 const authRoutes = require("./routes/authRoutes");
 const verifyToken = require("./middleware/authMiddleware");
 const authorizeRole = require("./middleware/roleMiddleware");
+const rideRoutes = require("./routes/rideRoutes");
 
 const app = express();
 
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/rides", rideRoutes);
 
 app.get("/", (req, res) => {
     res.send("THIS IS MY NEW SERVER");
