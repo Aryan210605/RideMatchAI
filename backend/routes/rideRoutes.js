@@ -1,26 +1,25 @@
 const express = require("express");
-
 const router = express.Router();
-
-const verifyToken = require("../middleware/authMiddleware");
 
 const {
     createRideController,
-    getAllRidesController
+    getAllRidesController,
+    getRideByIdController,
+    updateRideController,
+    deleteRideController,
+    searchRidesController
 } = require("../controllers/rideController");
 
-// Create Ride
-router.post(
-    "/create",
-    verifyToken,
-    createRideController
-);
+router.post("/create", createRideController);
 
-// View Rides
-router.get(
-    "/all",
-    verifyToken,
-    getAllRidesController
-);
+router.get("/", getAllRidesController);
+
+router.get("/search", searchRidesController);
+
+router.get("/:id", getRideByIdController);
+
+router.put("/:id", updateRideController);
+
+router.delete("/:id", deleteRideController);
 
 module.exports = router;

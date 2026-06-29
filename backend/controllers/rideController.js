@@ -1,14 +1,18 @@
 const {
     createRide,
-    getAvailableRides
+    getAllRides,
+    getRideById,
+    updateRide,
+    deleteRide,
+    searchRides
 } = require("../models/rideModel");
 
-// Create Ride
 const createRideController = async (req, res) => {
 
     try {
 
         const {
+            rider_id,
             pickup_location,
             destination,
             ride_date,
@@ -17,8 +21,23 @@ const createRideController = async (req, res) => {
             fare
         } = req.body;
 
+        if (
+            !rider_id ||
+            !pickup_location ||
+            !destination ||
+            !ride_date ||
+            !ride_time ||
+            !available_seats ||
+            !fare
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required"
+            });
+        }
+
         const ride = await createRide(
-            req.user.id,
+            rider_id,
             pickup_location,
             destination,
             ride_date,
@@ -35,7 +54,31 @@ const createRideController = async (req, res) => {
 
     } catch (error) {
 
-        console.error(error);
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+
+};
+const getAllRidesController = async (req, res) => {
+
+    try {
+
+        const rides = await getAllRides();
+
+        res.status(200).json({
+            success: true,
+            total: rides.length,
+            rides
+        });
+
+    } catch (error) {
+
+        console.log(error);
 
         res.status(500).json({
             success: false,
@@ -46,21 +89,159 @@ const createRideController = async (req, res) => {
 
 };
 
-// Get Available Rides
-const getAllRidesController = async (req, res) => {
+const getRideByIdController = async (req, res) => {
 
     try {
 
-        const rides = await getAvailableRides();
+        const { id } = req.params;
+
+        const ride = await getRideById(id);
+
+        if (!ride) {
+
+            return res.status(404).json({
+                success: false,
+                message: "Ride not found"
+            });
+
+        }
 
         res.status(200).json({
             success: true,
+            ride
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+
+};
+
+const updateRideController = async (req, res) => {
+
+    try {
+
+        const { id } = req.params;
+
+        const {
+            pickup_location,
+            destination,
+            ride_date,
+            ride_time,
+            available_seats,
+            fare
+        } = req.body;
+
+        const ride = await updateRide(
+            id,
+            pickup_location,
+            destination,
+            ride_date,
+            ride_time,
+            available_seats,
+            fare
+        );
+
+        if (!ride) {
+            return res.status(404).json({
+                success: false,
+                message: "Ride not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Ride updated successfully",
+            ride
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+
+};
+
+const deleteRideController = async (req, res) => {
+
+    try {
+
+        const { id } = req.params;
+
+        const ride = await deleteRide(id);
+
+        if (!ride) {
+            return res.status(404).json({
+                success: false,
+                message: "Ride not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Ride deleted successfully",
+            ride
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+
+};
+const searchRidesController = async (req, res) => {
+
+    try {
+
+        const {
+            pickup,
+            destination,
+            date
+        } = req.query;
+
+        if (!pickup || !destination || !date) {
+
+            return res.status(400).json({
+                success: false,
+                message: "Pickup, destination and date are required"
+            });
+
+        }
+
+        const rides = await searchRides(
+            pickup,
+            destination,
+            date
+        );
+
+        res.status(200).json({
+            success: true,
+            total: rides.length,
             rides
         });
 
     } catch (error) {
 
-        console.error(error);
+        console.log(error);
 
         res.status(500).json({
             success: false,
@@ -73,5 +254,9 @@ const getAllRidesController = async (req, res) => {
 
 module.exports = {
     createRideController,
-    getAllRidesController
+    getAllRidesController,
+    getRideByIdController,
+    updateRideController,
+    deleteRideController,
+    searchRidesController
 };

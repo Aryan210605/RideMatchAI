@@ -1,6 +1,5 @@
 const pool = require("../database/db");
 
-// Create Ride
 const createRide = async (
     rider_id,
     pickup_location,
@@ -13,8 +12,19 @@ const createRide = async (
 
     const result = await pool.query(
         `INSERT INTO rides
-        (rider_id,pickup_location,destination,ride_date,ride_time,available_seats,fare)
-        VALUES($1,$2,$3,$4,$5,$6,$7)
+        (
+            rider_id,
+            pickup_location,
+            destination,
+            ride_date,
+            ride_time,
+            available_seats,
+            fare
+        )
+
+        VALUES
+        ($1,$2,$3,$4,$5,$6,$7)
+
         RETURNING *`,
         [
             rider_id,
@@ -29,15 +39,95 @@ const createRide = async (
 
     return result.rows[0];
 };
+const getAllRides = async () => {
 
-// Get All Available Rides
-const getAvailableRides = async () => {
+    const result = await pool.query(
+        `SELECT * FROM rides
+         ORDER BY id ASC`
+    );
+
+    return result.rows;
+
+};
+
+const getRideById = async (id) => {
+
+    const result = await pool.query(
+        `SELECT * FROM rides
+         WHERE id = $1`,
+        [id]
+    );
+
+    return result.rows[0];
+
+};
+
+const updateRide = async (
+    id,
+    pickup_location,
+    destination,
+    ride_date,
+    ride_time,
+    available_seats,
+    fare
+) => {
+
+    const result = await pool.query(
+        `UPDATE rides
+         SET
+            pickup_location = $1,
+            destination = $2,
+            ride_date = $3,
+            ride_time = $4,
+            available_seats = $5,
+            fare = $6
+         WHERE id = $7
+         RETURNING *`,
+        [
+            pickup_location,
+            destination,
+            ride_date,
+            ride_time,
+            available_seats,
+            fare,
+            id
+        ]
+    );
+
+    return result.rows[0];
+};
+
+const deleteRide = async (id) => {
+
+    const result = await pool.query(
+        `DELETE FROM rides
+         WHERE id = $1
+         RETURNING *`,
+        [id]
+    );
+
+    return result.rows[0];
+};
+
+const searchRides = async (
+    pickup_location,
+    destination,
+    ride_date
+) => {
 
     const result = await pool.query(
         `SELECT *
          FROM rides
-         WHERE status='available'
-         ORDER BY created_at DESC`
+         WHERE pickup_location ILIKE $1
+         AND destination ILIKE $2
+         AND ride_date = $3
+         AND status = 'available'
+         ORDER BY ride_time ASC`,
+        [
+            `%${pickup_location}%`,
+            `%${destination}%`,
+            ride_date
+        ]
     );
 
     return result.rows;
@@ -45,5 +135,9 @@ const getAvailableRides = async () => {
 
 module.exports = {
     createRide,
-    getAvailableRides
+    getAllRides,
+    getRideById,
+    updateRide,
+    deleteRide,
+    searchRides
 };
