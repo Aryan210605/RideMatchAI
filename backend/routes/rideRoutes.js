@@ -10,16 +10,35 @@ const {
     searchRidesController
 } = require("../controllers/rideController");
 
-router.post("/create", createRideController);
+const { authenticateToken } = require("../middleware/authMiddleware");
 
-router.get("/", getAllRidesController);
+const authorizeRole = require("../middleware/roleMiddleware");
+
+router.post(
+    "/create",
+    authenticateToken,
+    authorizeRole("driver"),
+    createRideController
+);
+
+router.get("/", authenticateToken, getAllRidesController);
 
 router.get("/search", searchRidesController);
 
-router.get("/:id", getRideByIdController);
+router.get("/:id", authenticateToken, getRideByIdController);
 
-router.put("/:id", updateRideController);
+router.put(
+    "/:id",
+    authenticateToken,
+    authorizeRole("driver"),
+    updateRideController
+);
 
-router.delete("/:id", deleteRideController);
+router.delete(
+    "/:id",
+    authenticateToken,
+    authorizeRole("driver"),
+    deleteRideController
+);
 
 module.exports = router;

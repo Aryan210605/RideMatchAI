@@ -3,11 +3,16 @@ const router = express.Router();
 
 const {
     registerUser,
-    loginUser
+    loginUser,
+    getProfileController
 } = require("../controllers/authController");
+
+const { authenticateToken } = require("../middleware/authMiddleware");
 
 router.post("/register", registerUser);
 
 router.post("/login", loginUser);
+
+router.get("/profile", authenticateToken, getProfileController);
 
 module.exports = router;

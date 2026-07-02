@@ -9,14 +9,31 @@ const {
     getBookingsByPassengerIdController
 } = require("../controllers/bookingController");
 
-router.post("/create", createBookingController);
+const { authenticateToken } = require("../middleware/authMiddleware");
+const authorizeRole = require("../middleware/roleMiddleware");
 
-router.get("/", getAllBookingsController);
+router.post(
+    "/create",
+    authenticateToken,
+    authorizeRole("rider"),
+    createBookingController
+);
 
-router.get("/passenger/:passenger_id", getBookingsByPassengerIdController);
+router.get("/", authenticateToken, getAllBookingsController);
 
-router.get("/:id", getBookingByIdController);
+router.get(
+    "/passenger/:passenger_id",
+    authenticateToken,
+    getBookingsByPassengerIdController
+);
 
-router.put("/cancel/:id", cancelBookingController);
+router.get("/:id", authenticateToken, getBookingByIdController);
+
+router.put(
+    "/cancel/:id",
+    authenticateToken,
+    authorizeRole("rider"),
+    cancelBookingController
+);
 
 module.exports = router;

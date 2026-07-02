@@ -124,10 +124,33 @@ const loginUser = async (req, res) => {
     }
 };
 
+const getProfileController = async (req, res) => {
+
+    try {
+
+        res.status(200).json({
+            success: true,
+            user: req.user
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+
+};
+
 // ==========================
 // Export Functions
 // ==========================
 module.exports = {
     registerUser,
     loginUser,
+    getProfileController
 };

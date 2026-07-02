@@ -3,7 +3,7 @@ require("dotenv").config();
 const express = require("express");
 
 const authRoutes = require("./routes/authRoutes");
-const verifyToken = require("./middleware/authMiddleware");
+const { authenticateToken } = require("./middleware/authMiddleware");
 const authorizeRole = require("./middleware/roleMiddleware");
 const rideRoutes = require("./routes/rideRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
@@ -20,7 +20,7 @@ app.get("/", (req, res) => {
 });
 
 // Protected Route
-app.get("/api/profile", verifyToken, (req, res) => {
+app.get("/api/profile", authenticateToken, (req, res) => {
     res.status(200).json({
         success: true,
         message: "Protected route accessed successfully",
@@ -31,7 +31,7 @@ app.get("/api/profile", verifyToken, (req, res) => {
 // Rider Dashboard (Only Rider Can Access)
 app.get(
     "/api/rider-dashboard",
-    verifyToken,
+    authenticateToken,
     authorizeRole("rider"),
     (req, res) => {
         res.status(200).json({
@@ -44,7 +44,7 @@ app.get(
 
 app.get(
     "/api/driver-dashboard",
-    verifyToken,
+    authenticateToken,
     authorizeRole("driver"),
     (req, res) => {
         res.json({
