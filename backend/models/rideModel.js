@@ -133,11 +133,28 @@ const searchRides = async (
     return result.rows;
 };
 
+const reduceAvailableSeats = async (ride_id, seats_booked) => {
+
+    const result = await pool.query(
+        `UPDATE rides
+         SET available_seats = available_seats - $1
+         WHERE id = $2
+         RETURNING *`,
+        [seats_booked, ride_id]
+    );
+
+    return result.rows[0];
+
+};
+
+
+
 module.exports = {
     createRide,
     getAllRides,
     getRideById,
     updateRide,
     deleteRide,
-    searchRides
+    searchRides,
+    reduceAvailableSeats
 };
