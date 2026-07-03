@@ -23,7 +23,11 @@ router.post(
 
 router.get("/", authenticateToken, getAllRidesController);
 
-router.get("/search", searchRidesController);
+router.get(
+    "/search",
+    authenticateToken,
+    searchRidesController
+);
 
 router.get("/:id", authenticateToken, getRideByIdController);
 

@@ -4,6 +4,7 @@ const {
     getRideById,
     updateRide,
     deleteRide,
+    reduceAvailableSeats,
     searchRides
 } = require("../models/rideModel");
 
@@ -213,25 +214,41 @@ const searchRidesController = async (req, res) => {
     try {
 
         const {
-            pickup,
+            pickup_location,
             destination,
-            date
+            ride_date,
+            seats
         } = req.query;
 
-        if (!pickup || !destination || !date) {
+        if (!pickup_location || !destination || !ride_date || !seats) {
 
             return res.status(400).json({
                 success: false,
-                message: "Pickup, destination and date are required"
+                message: "Pickup, destination, ride date and seats are required"
             });
 
         }
 
+        if (isNaN(seats) || Number(seats) <= 0){
+            return res.status(400).json({
+                success: false,
+                message: "Seats must be a positive number"
+            });
+        }
+
         const rides = await searchRides(
-            pickup,
+            pickup_location,
             destination,
-            date
+            ride_date,
+            seats
         );
+
+        if (rides.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No rides found"
+            });
+        }
 
         res.status(200).json({
             success: true,
@@ -251,6 +268,8 @@ const searchRidesController = async (req, res) => {
     }
 
 };
+
+
 
 module.exports = {
     createRideController,

@@ -112,7 +112,8 @@ const deleteRide = async (id) => {
 const searchRides = async (
     pickup_location,
     destination,
-    ride_date
+    ride_date,
+    seats
 ) => {
 
     const result = await pool.query(
@@ -121,12 +122,13 @@ const searchRides = async (
          WHERE pickup_location ILIKE $1
          AND destination ILIKE $2
          AND ride_date = $3
-         AND status = 'available'
-         ORDER BY ride_time ASC`,
+         AND available_seats >= $4
+         ORDER BY fare ASC`,
         [
             `%${pickup_location}%`,
             `%${destination}%`,
-            ride_date
+            ride_date,
+            seats
         ]
     );
 
@@ -148,13 +150,12 @@ const reduceAvailableSeats = async (ride_id, seats_booked) => {
 };
 
 
-
 module.exports = {
     createRide,
     getAllRides,
     getRideById,
     updateRide,
     deleteRide,
-    searchRides,
-    reduceAvailableSeats
+    reduceAvailableSeats,
+    searchRides
 };
