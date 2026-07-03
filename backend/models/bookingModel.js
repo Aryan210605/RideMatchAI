@@ -78,10 +78,25 @@ const getBookingsByPassengerId = async (passenger_id) => {
 
 };
 
+const confirmBooking = async (booking_id) => {
+
+    const result = await pool.query(
+        `UPDATE bookings
+         SET booking_status = 'confirmed'
+         WHERE id = $1
+         RETURNING *`,
+        [booking_id]
+    );
+
+    return result.rows[0];
+
+};
+
 module.exports = {
     createBooking,
     getAllBookings,
     getBookingById,
     cancelBooking,
-    getBookingsByPassengerId
+    getBookingsByPassengerId,
+    confirmBooking
 };
