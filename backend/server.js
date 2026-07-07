@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
-
+const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const { authenticateToken } = require("./middleware/authMiddleware");
 const authorizeRole = require("./middleware/roleMiddleware");
@@ -11,6 +11,8 @@ const paymentRoutes = require("./routes/paymentRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
+
+app.use(cors());
 
 app.use(express.json());
 app.use("/api/auth", authRoutes);
@@ -60,6 +62,13 @@ app.get(
 );
 
 const PORT = process.env.PORT || 5000;
+
+app.get("/api/test", (req, res) => {
+    res.json({
+        success: true,
+        message: "Frontend connected successfully!"
+    });
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
