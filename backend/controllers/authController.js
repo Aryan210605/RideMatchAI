@@ -1,6 +1,14 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { findUserByEmail, createUser } = require("../models/userModel");
+
+const {
+    findUserByEmail,
+    createUser,
+    getAllUsers,
+    blockUser,
+    unblockUser,
+    deleteUser
+} = require("../models/userModel");
 
 // ==========================
 // Register User
@@ -146,11 +154,167 @@ const getProfileController = async (req, res) => {
 
 };
 
+const getAllUsersController = async (req,res)=>{
+
+    try{
+
+        const users=await getAllUsers();
+
+        res.status(200).json({
+            success:true,
+            total:users.length,
+            users
+        });
+
+    }
+
+    catch(error){
+
+        console.log(error);
+
+        res.status(500).json({
+            success:false,
+            message:"Internal Server Error"
+        });
+
+    }
+
+};
+
+const blockUserController=async(req,res)=>{
+
+    try{
+
+        const user=await blockUser(req.params.id);
+
+        if(!user){
+
+            return res.status(404).json({
+
+                success:false,
+                message:"User not found"
+
+            });
+
+        }
+
+        res.status(200).json({
+
+            success:true,
+            message:"User blocked successfully",
+            user
+
+        });
+
+    }
+
+    catch(error){
+
+        console.log(error);
+
+        res.status(500).json({
+
+            success:false,
+            message:"Internal Server Error"
+
+        });
+
+    }
+
+};
+
+const unblockUserController=async(req,res)=>{
+
+    try{
+
+        const user=await unblockUser(req.params.id);
+
+        if(!user){
+
+            return res.status(404).json({
+
+                success:false,
+                message:"User not found"
+
+            });
+
+        }
+
+        res.status(200).json({
+
+            success:true,
+            message:"User unblocked successfully",
+            user
+
+        });
+
+    }
+
+    catch(error){
+
+        console.log(error);
+
+        res.status(500).json({
+
+            success:false,
+            message:"Internal Server Error"
+
+        });
+
+    }
+
+};
+
+const deleteUserController=async(req,res)=>{
+
+    try{
+
+        const user=await deleteUser(req.params.id);
+
+        if(!user){
+
+            return res.status(404).json({
+
+                success:false,
+                message:"User not found"
+
+            });
+
+        }
+
+        res.status(200).json({
+
+            success:true,
+            message:"User deleted successfully"
+
+        });
+
+    }
+
+    catch(error){
+
+        console.log(error);
+
+        res.status(500).json({
+
+            success:false,
+            message:"Internal Server Error"
+
+        });
+
+    }
+
+};
+
 // ==========================
 // Export Functions
 // ==========================
 module.exports = {
     registerUser,
     loginUser,
-    getProfileController
+    getProfileController,
+    getAllUsersController,
+    blockUserController,
+    unblockUserController,
+    deleteUserController
 };

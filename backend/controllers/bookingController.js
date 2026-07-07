@@ -3,7 +3,10 @@ const {
     getAllBookings,
     getBookingById,
     cancelBooking,
-    getBookingsByPassengerId
+    getBookingsByPassengerId,
+    confirmBooking,
+    adminCancelBooking,
+    adminDeleteBooking
 } = require("../models/bookingModel");
 
 const {
@@ -180,9 +183,9 @@ const getBookingsByPassengerIdController = async (req, res) => {
 
     try {
 
-        const { passenger_id } = req.params;
+        const { id } = req.params;
 
-        const bookings = await getBookingsByPassengerId(passenger_id);
+        const bookings = await getBookingsByPassengerId(id);
 
         res.status(200).json({
             success: true,
@@ -203,10 +206,76 @@ const getBookingsByPassengerIdController = async (req, res) => {
 
 };
 
+const adminCancelBookingController = async (req, res) => {
+
+    try {
+
+        const booking = await adminCancelBooking(req.params.id);
+
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: "Booking not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Booking cancelled",
+            booking
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+
+};
+
+const adminDeleteBookingController = async (req, res) => {
+
+    try {
+
+        const booking = await adminDeleteBooking(req.params.id);
+
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: "Booking not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Booking deleted"
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+
+};
+
 module.exports = {
     createBookingController,
     getAllBookingsController,
     getBookingByIdController,
     cancelBookingController,
-    getBookingsByPassengerIdController
+    getBookingsByPassengerIdController,
+    getAllBookingsController,
+    adminCancelBookingController,
+    adminDeleteBookingController
 };

@@ -27,17 +27,6 @@ const createBooking = async (
     return result.rows[0];
 };
 
-const getAllBookings = async () => {
-
-    const result = await pool.query(
-        `SELECT * FROM bookings
-         ORDER BY id ASC`
-    );
-
-    return result.rows;
-
-};
-
 const getBookingById = async (id) => {
 
     const result = await pool.query(
@@ -92,11 +81,57 @@ const confirmBooking = async (booking_id) => {
 
 };
 
+const getAllBookings = async () => {
+
+    const result = await pool.query(
+        `SELECT
+            bookings.*,
+            users.full_name,
+            rides.pickup_location,
+            rides.destination
+        FROM bookings
+        JOIN users
+            ON bookings.passenger_id = users.id
+        JOIN rides
+            ON bookings.ride_id = rides.id
+        ORDER BY bookings.booked_at DESC`
+    );
+
+    return result.rows;
+};
+
+const adminCancelBooking = async (id) => {
+
+    const result = await pool.query(
+        `UPDATE bookings
+        SET booking_status = 'cancelled'
+        WHERE id = $1
+        RETURNING *`,
+        [id]
+    );
+
+    return result.rows[0];
+};
+
+const adminDeleteBooking = async (id) => {
+
+    const result = await pool.query(
+        `DELETE FROM bookings
+        WHERE id = $1
+        RETURNING *`,
+        [id]
+    );
+
+    return result.rows[0];
+};
+
 module.exports = {
     createBooking,
-    getAllBookings,
     getBookingById,
-    cancelBooking,
     getBookingsByPassengerId,
-    confirmBooking
+    cancelBooking,
+    confirmBooking,
+    getAllBookings,
+    adminCancelBooking,
+    adminDeleteBooking
 };
