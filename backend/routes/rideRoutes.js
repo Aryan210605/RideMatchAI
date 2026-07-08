@@ -12,36 +12,45 @@ const {
 
 const { authenticateToken } = require("../middleware/authMiddleware");
 
-const authorizeRole = require("../middleware/roleMiddleware");
-
+// Create Ride
 router.post(
     "/create",
     authenticateToken,
-    authorizeRole("driver"),
     createRideController
 );
 
-router.get("/", authenticateToken, getAllRidesController);
+// Get All Rides
+router.get(
+    "/",
+    authenticateToken,
+    getAllRidesController
+);
 
+// Search Rides
 router.get(
     "/search",
     authenticateToken,
     searchRidesController
 );
 
-router.get("/:id", authenticateToken, getRideByIdController);
+// Get Ride By ID
+router.get(
+    "/:id",
+    authenticateToken,
+    getRideByIdController
+);
 
+// Update Ride
 router.put(
     "/:id",
     authenticateToken,
-    authorizeRole("driver"),
     updateRideController
 );
 
+// Delete Ride
 router.delete(
     "/:id",
     authenticateToken,
-    authorizeRole("driver"),
     deleteRideController
 );
 

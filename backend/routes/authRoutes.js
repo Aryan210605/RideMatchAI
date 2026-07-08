@@ -12,33 +12,32 @@ const {
 } = require("../controllers/authController");
 
 const { authenticateToken } = require("../middleware/authMiddleware");
-
-// Use the correct middleware filename
 const authorizeRole = require("../middleware/roleMiddleware");
-// If your file is actually named roleMiddleware.js, then keep:
-// const authorizeRole = require("../middleware/roleMiddleware");
 
-// =========================
+// ===========================
 // Public Routes
-// =========================
+// ===========================
 
+// Register
 router.post("/register", registerUser);
 
+// Login
 router.post("/login", loginUser);
 
-// =========================
+// ===========================
 // User Routes
-// =========================
+// ===========================
 
+// Logged-in User Profile
 router.get(
     "/profile",
     authenticateToken,
     getProfileController
 );
 
-// =========================
+// ===========================
 // Admin Routes
-// =========================
+// ===========================
 
 // Get all users
 router.get(
@@ -48,7 +47,7 @@ router.get(
     getAllUsersController
 );
 
-// Block a user
+// Block user
 router.put(
     "/admin/block/:id",
     authenticateToken,
@@ -56,7 +55,7 @@ router.put(
     blockUserController
 );
 
-// Unblock a user
+// Unblock user
 router.put(
     "/admin/unblock/:id",
     authenticateToken,
@@ -64,7 +63,7 @@ router.put(
     unblockUserController
 );
 
-// Delete a user
+// Delete user
 router.delete(
     "/admin/delete/:id",
     authenticateToken,

@@ -42,8 +42,10 @@ const createRide = async (
 const getAllRides = async () => {
 
     const result = await pool.query(
-        `SELECT * FROM rides
-         ORDER BY id ASC`
+        `SELECT *
+        FROM rides
+        WHERE available_seats > 0
+        ORDER BY ride_date ASC, ride_time ASC`
     );
 
     return result.rows;
@@ -53,8 +55,10 @@ const getAllRides = async () => {
 const getRideById = async (id) => {
 
     const result = await pool.query(
-        `SELECT * FROM rides
-         WHERE id = $1`,
+        `SELECT * 
+        FROM rides
+        WHERE id = $1
+        LIMIT 1`,
         [id]
     );
 
@@ -117,22 +121,25 @@ const searchRides = async (
 ) => {
 
     const result = await pool.query(
-        `SELECT *
-         FROM rides
-         WHERE pickup_location ILIKE $1
-         AND destination ILIKE $2
-         AND ride_date = $3
-         AND available_seats >= $4
-         ORDER BY fare ASC`,
+        `
+        SELECT *
+        FROM rides
+        WHERE pickup_location ILIKE $1
+        AND destination ILIKE $2
+        AND ride_date = $3
+        AND available_seats >= $4
+        ORDER BY fare ASC
+        `,
         [
             `%${pickup_location}%`,
             `%${destination}%`,
             ride_date,
-            seats
+            Number(seats)
         ]
     );
 
     return result.rows;
+
 };
 
 const reduceAvailableSeats = async (ride_id, seats_booked) => {
@@ -141,6 +148,7 @@ const reduceAvailableSeats = async (ride_id, seats_booked) => {
         `UPDATE rides
          SET available_seats = available_seats - $1
          WHERE id = $2
+         AND available_seats >= $1
          RETURNING *`,
         [seats_booked, ride_id]
     );

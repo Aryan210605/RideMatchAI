@@ -1,34 +1,56 @@
-import { Link } from "react-router-dom";
-import "../styles/Navbar.css";
+import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 function Navbar() {
+
+    const navigate = useNavigate();
+
+    const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
+
+    const logout = () => {
+
+        localStorage.removeItem("token");
+
+        setIsLoggedIn(false);
+
+        navigate("/login");
+
+    };
+
     return (
-        <nav className="navbar">
 
-            <h2>🚗 RideMatch AI</h2>
+        <nav
+            style={{
+                display: "flex",
+                justifyContent: "space-between",
+                padding: "15px",
+                background: "#0d6efd",
+                color: "white"
+            }}
+        >
 
-            <div className="nav-links">
+            <h2>RideMatch AI</h2>
 
-                <Link to="/">Home</Link>
+            {
+                isLoggedIn &&
 
-                <Link to="/search">Search Ride</Link>
+                <button
+                    onClick={logout}
+                    style={{
+                        padding: "10px 20px",
+                        cursor: "pointer"
+                    }}
+                >
+                    Logout
+                </button>
 
-                <Link to="/create-ride">Create Ride</Link>
-
-                <Link to="/bookings">My Bookings</Link>
-
-                <Link to="/payments">Payments</Link>
-
-                <Link to="/dashboard">Dashboard</Link>
-
-                <Link to="/login">Login</Link>
-
-                <Link to="/register">Register</Link>
-
-            </div>
+            }
 
         </nav>
+
     );
+
 }
 
 export default Navbar;

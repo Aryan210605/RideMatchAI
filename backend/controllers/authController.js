@@ -7,7 +7,8 @@ const {
     getAllUsers,
     blockUser,
     unblockUser,
-    deleteUser
+    deleteUser,
+    getUserById
 } = require("../models/userModel");
 
 // ==========================
@@ -136,9 +137,22 @@ const getProfileController = async (req, res) => {
 
     try {
 
+        const user = await getUserById(req.user.id);
+
+        if (!user) {
+
+            return res.status(404).json({
+                success:false,
+                message:"User not found"
+            });
+
+        }
+
         res.status(200).json({
-            success: true,
-            user: req.user
+
+            success:true,
+            user
+
         });
 
     } catch (error) {
@@ -146,8 +160,10 @@ const getProfileController = async (req, res) => {
         console.log(error);
 
         res.status(500).json({
-            success: false,
-            message: "Internal Server Error"
+
+            success:false,
+            message:"Internal Server Error"
+
         });
 
     }

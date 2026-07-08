@@ -10,9 +10,12 @@ import SearchRide from "./pages/SearchRide";
 import CreateRide from "./pages/CreateRide";
 import MyBookings from "./pages/MyBookings";
 import MyPayments from "./pages/MyPayments";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
+
     return (
+
         <BrowserRouter>
 
             <Navbar />
@@ -25,20 +28,57 @@ function App() {
 
                 <Route path="/register" element={<Register />} />
 
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route
+    path="/dashboard"
+    element={
+        <ProtectedRoute>
+            <Dashboard />
+        </ProtectedRoute>
+    }
+/>
 
-                <Route path="/search" element={<SearchRide />} />
+<Route
+    path="/search"
+    element={
+        <ProtectedRoute>
+            <SearchRide />
+        </ProtectedRoute>
+    }
+/>
 
-                <Route path="/create-ride" element={<CreateRide />} />
+<Route
+    path="/create-ride"
+    element={
+        <ProtectedRoute>
+            <CreateRide />
+        </ProtectedRoute>
+    }
+/>
 
-                <Route path="/bookings" element={<MyBookings />} />
+<Route
+    path="/bookings"
+    element={
+        <ProtectedRoute>
+            <MyBookings />
+        </ProtectedRoute>
+    }
+/>
 
-                <Route path="/payments" element={<MyPayments />} />
+<Route
+    path="/payments"
+    element={
+        <ProtectedRoute>
+            <MyPayments />
+        </ProtectedRoute>
+    }
+/>
 
             </Routes>
 
         </BrowserRouter>
+
     );
+
 }
 
 export default App;
