@@ -1,18 +1,17 @@
+import { Link, useNavigate } from "react-router-dom";
 import { useContext } from "react";
-import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import "../styles/Navbar.css";
 
 function Navbar() {
 
+    const { isLoggedIn, logout } = useContext(AuthContext);
+
     const navigate = useNavigate();
 
-    const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
+    const handleLogout = () => {
 
-    const logout = () => {
-
-        localStorage.removeItem("token");
-
-        setIsLoggedIn(false);
+        logout();
 
         navigate("/login");
 
@@ -20,32 +19,74 @@ function Navbar() {
 
     return (
 
-        <nav
-            style={{
-                display: "flex",
-                justifyContent: "space-between",
-                padding: "15px",
-                background: "#0d6efd",
-                color: "white"
-            }}
-        >
+        <nav className="navbar">
 
-            <h2>RideMatch AI</h2>
+            <div className="logo">
 
-            {
-                isLoggedIn &&
+                <h2>🚗 RideMatch AI</h2>
 
-                <button
-                    onClick={logout}
-                    style={{
-                        padding: "10px 20px",
-                        cursor: "pointer"
-                    }}
-                >
-                    Logout
-                </button>
+            </div>
 
-            }
+            <div className="nav-links">
+
+                <Link to="/">
+                    Home
+                </Link>
+
+                {
+
+                    isLoggedIn ? (
+
+                        <>
+
+                            <Link to="/dashboard">
+                                Dashboard
+                            </Link>
+
+                            <Link to="/search">
+                                Search Ride
+                            </Link>
+
+                            <Link to="/create-ride">
+                                Create Ride
+                            </Link>
+
+                            <Link to="/bookings">
+                                My Bookings
+                            </Link>
+
+                            <Link to="/payments">
+                                Payments
+                            </Link>
+
+                            <button
+                                className="logout-btn"
+                                onClick={handleLogout}
+                            >
+                                Logout
+                            </button>
+
+                        </>
+
+                    ) : (
+
+                        <>
+
+                            <Link to="/login">
+                                Login
+                            </Link>
+
+                            <Link to="/register">
+                                Register
+                            </Link>
+
+                        </>
+
+                    )
+
+                }
+
+            </div>
 
         </nav>
 

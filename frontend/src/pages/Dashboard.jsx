@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import API from "../services/api";
+import "../styles/Dashboard.css";
 
 function Dashboard() {
 
@@ -11,23 +13,13 @@ function Dashboard() {
 
             try {
 
-                console.log("Token =", localStorage.getItem("token"));
-
                 const response = await API.get("/auth/profile");
-
-                console.log("PROFILE RESPONSE");
-                console.log(response.data);
 
                 setUser(response.data.user);
 
             } catch (error) {
 
-                console.log("FULL ERROR");
                 console.log(error);
-
-                if (error.response) {
-                    console.log(error.response.data);
-                }
 
             }
 
@@ -39,23 +31,73 @@ function Dashboard() {
 
     return (
 
-        <div style={{ padding: "30px" }}>
+        <div className="dashboard-container">
 
             <h1>Dashboard</h1>
 
-            {user ? (
+            {
+                user ? (
 
-                <>
-                    <h2>Welcome, {user.full_name}</h2>
-                    <p>Email: {user.email}</p>
-                    <p>Role: {user.role}</p>
-                </>
+                    <>
 
-            ) : (
+                        <div className="profile-card">
 
-                <p>Loading...</p>
+                            <h2>Welcome, {user.full_name}</h2>
 
-            )}
+                            <p>
+                                <strong>Email :</strong> {user.email}
+                            </p>
+
+                            <p>
+                                <strong>Role :</strong> {user.role}
+                            </p>
+
+                        </div>
+
+                        <div className="action-grid">
+
+                            <Link
+                                to="/create-ride"
+                                className="action-card"
+                            >
+                                <h3>🚗 Create Ride</h3>
+                                <p>Create a new ride for passengers.</p>
+                            </Link>
+
+                            <Link
+                                to="/search"
+                                className="action-card"
+                            >
+                                <h3>🔍 Search Ride</h3>
+                                <p>Find rides matching your route.</p>
+                            </Link>
+
+                            <Link
+                                to="/bookings"
+                                className="action-card"
+                            >
+                                <h3>📖 My Bookings</h3>
+                                <p>View all your ride bookings.</p>
+                            </Link>
+
+                            <Link
+                                to="/payments"
+                                className="action-card"
+                            >
+                                <h3>💳 Payments</h3>
+                                <p>Check your payment history.</p>
+                            </Link>
+
+                        </div>
+
+                    </>
+
+                ) : (
+
+                    <h2>Loading...</h2>
+
+                )
+            }
 
         </div>
 

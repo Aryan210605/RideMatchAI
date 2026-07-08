@@ -6,6 +6,8 @@ function CreateRide() {
 
     const navigate = useNavigate();
 
+    const [loading, setLoading] = useState(false);
+
     const [formData, setFormData] = useState({
         pickup_location: "",
         destination: "",
@@ -28,9 +30,29 @@ function CreateRide() {
 
         e.preventDefault();
 
+        if (
+            !formData.pickup_location ||
+            !formData.destination ||
+            !formData.ride_date ||
+            !formData.ride_time ||
+            !formData.available_seats ||
+            !formData.fare
+        ) {
+
+            alert("Please fill all fields.");
+            return;
+
+        }
+
         try {
 
-            const response = await createRide(formData);
+            setLoading(true);
+
+            const response = await createRide({
+                ...formData,
+                available_seats: Number(formData.available_seats),
+                fare: Number(formData.fare)
+            });
 
             alert(response.data.message);
 
@@ -45,15 +67,27 @@ function CreateRide() {
                 "Failed to create ride"
             );
 
+        } finally {
+
+            setLoading(false);
+
         }
 
     };
 
     return (
 
-        <div style={{ padding: "30px" }}>
+        <div
+            style={{
+                maxWidth: "500px",
+                margin: "40px auto",
+                padding: "25px",
+                border: "1px solid #ddd",
+                borderRadius: "10px"
+            }}
+        >
 
-            <h1>Create Ride</h1>
+            <h2>Create Ride</h2>
 
             <form onSubmit={handleSubmit}>
 
@@ -64,9 +98,8 @@ function CreateRide() {
                     value={formData.pickup_location}
                     onChange={handleChange}
                     required
+                    style={{ width: "100%", padding: "10px", marginBottom: "15px" }}
                 />
-
-                <br /><br />
 
                 <input
                     type="text"
@@ -75,9 +108,8 @@ function CreateRide() {
                     value={formData.destination}
                     onChange={handleChange}
                     required
+                    style={{ width: "100%", padding: "10px", marginBottom: "15px" }}
                 />
-
-                <br /><br />
 
                 <input
                     type="date"
@@ -85,9 +117,8 @@ function CreateRide() {
                     value={formData.ride_date}
                     onChange={handleChange}
                     required
+                    style={{ width: "100%", padding: "10px", marginBottom: "15px" }}
                 />
-
-                <br /><br />
 
                 <input
                     type="time"
@@ -95,9 +126,8 @@ function CreateRide() {
                     value={formData.ride_time}
                     onChange={handleChange}
                     required
+                    style={{ width: "100%", padding: "10px", marginBottom: "15px" }}
                 />
-
-                <br /><br />
 
                 <input
                     type="number"
@@ -106,9 +136,9 @@ function CreateRide() {
                     value={formData.available_seats}
                     onChange={handleChange}
                     required
+                    min="1"
+                    style={{ width: "100%", padding: "10px", marginBottom: "15px" }}
                 />
-
-                <br /><br />
 
                 <input
                     type="number"
@@ -117,14 +147,20 @@ function CreateRide() {
                     value={formData.fare}
                     onChange={handleChange}
                     required
+                    min="1"
+                    style={{ width: "100%", padding: "10px", marginBottom: "20px" }}
                 />
 
-                <br /><br />
-
-                <button type="submit">
-
-                    Create Ride
-
+                <button
+                    type="submit"
+                    disabled={loading}
+                    style={{
+                        width: "100%",
+                        padding: "12px",
+                        cursor: "pointer"
+                    }}
+                >
+                    {loading ? "Creating..." : "Create Ride"}
                 </button>
 
             </form>

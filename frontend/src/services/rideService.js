@@ -6,10 +6,7 @@ import API from "./api";
 
 export const createRide = (rideData) => {
 
-    return API.post(
-        "/rides/create",
-        rideData
-    );
+    return API.post("/rides/create", rideData);
 
 };
 
@@ -37,16 +34,16 @@ export const getRideById = (id) => {
 // Search Rides
 // ==========================
 
-export const searchRides = (
-    pickup_location,
-    destination,
-    ride_date,
-    seats
-) => {
+export const searchRides = (searchData) => {
 
-    return API.get(
-        `/rides/search?pickup_location=${pickup_location}&destination=${destination}&ride_date=${ride_date}&seats=${seats}`
-    );
+    return API.get("/rides/search", {
+        params: {
+            pickup_location: searchData.pickup_location,
+            destination: searchData.destination,
+            ride_date: searchData.ride_date,
+            seats: searchData.seats
+        }
+    });
 
 };
 
@@ -54,15 +51,9 @@ export const searchRides = (
 // Update Ride
 // ==========================
 
-export const updateRide = (
-    id,
-    rideData
-) => {
+export const updateRide = (id, rideData) => {
 
-    return API.put(
-        `/rides/${id}`,
-        rideData
-    );
+    return API.put(`/rides/${id}`, rideData);
 
 };
 
