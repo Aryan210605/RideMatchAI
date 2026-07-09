@@ -4,47 +4,59 @@ const jwt = require("jsonwebtoken");
 const {
     findUserByEmail,
     createUser,
+    getUserById,
     getAllUsers,
     blockUser,
     unblockUser,
-    deleteUser,
-    getUserById
+    deleteUser
 } = require("../models/userModel");
 
-// ==========================
-// Register User
-// ==========================
-const registerUser = async (req, res) => {
-    try {
-        const { full_name, email, password, role } = req.body;
+// ======================================
+// Register
+// ======================================
 
-        // Check required fields
+const registerUser = async (req, res) => {
+
+    try {
+
+        const {
+            full_name,
+            email,
+            password,
+            role
+        } = req.body;
+
         if (!full_name || !email || !password) {
+
             return res.status(400).json({
                 success: false,
                 message: "All fields are required"
             });
+
         }
 
-        // Check if email already exists
         const existingUser = await findUserByEmail(email);
 
         if (existingUser) {
+
             return res.status(400).json({
                 success: false,
-                message: "Email already exists"
+                message: "Email already registered"
             });
+
         }
 
-        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Save user
+        // Only allow rider or driver
+        const userRole =
+            role === "driver" ? "driver" : "rider";
+
         const user = await createUser(
             full_name,
             email,
             hashedPassword,
-            role || "rider"
+            userRole
         );
 
         res.status(201).json({
@@ -54,84 +66,103 @@ const registerUser = async (req, res) => {
         });
 
     } catch (error) {
-        console.error(error);
+
+        console.log(error);
 
         res.status(500).json({
             success: false,
             message: "Internal Server Error"
         });
+
     }
+
 };
 
-// ==========================
-// Login User
-// ==========================
+// ======================================
+// Login
+// ======================================
+
 const loginUser = async (req, res) => {
+
     try {
+
         const { email, password } = req.body;
 
-        // Check required fields
         if (!email || !password) {
+
             return res.status(400).json({
                 success: false,
-                message: "Email and Password are required"
+                message: "Email and password are required"
             });
+
         }
 
-        // Find user by email
         const user = await findUserByEmail(email);
 
         if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found"
-            });
-        }
 
-        // Compare password
-        const isMatch = await bcrypt.compare(password, user.password);
-
-        if (!isMatch) {
             return res.status(401).json({
                 success: false,
-                message: "Invalid password"
+                message: "Invalid email or password"
             });
+
         }
 
-        // Generate JWT Token
+        const isMatch = await bcrypt.compare(
+            password,
+            user.password
+        );
+
+        if (!isMatch) {
+
+            return res.status(401).json({
+                success: false,
+                message: "Invalid email or password"
+            });
+
+        }
+
         const token = jwt.sign(
+
             {
                 id: user.id,
                 role: user.role
             },
+
             process.env.JWT_SECRET,
+
             {
                 expiresIn: "7d"
             }
+
         );
 
-        // Success response
         res.status(200).json({
+
             success: true,
-            message: "Login successful",
-            token,
-            user: {
-                id: user.id,
-                full_name: user.full_name,
-                email: user.email,
-                role: user.role
-            }
+            message: "Login Successful",
+            token
+
         });
 
     } catch (error) {
-        console.error(error);
+
+        console.log(error);
 
         res.status(500).json({
+
             success: false,
             message: "Internal Server Error"
+
         });
+
     }
+
 };
+
+// ======================================
+// Get Profile
+// ======================================
 
 const getProfileController = async (req, res) => {
 
@@ -139,18 +170,9 @@ const getProfileController = async (req, res) => {
 
         const user = await getUserById(req.user.id);
 
-        if (!user) {
-
-            return res.status(404).json({
-                success:false,
-                message:"User not found"
-            });
-
-        }
-
         res.status(200).json({
 
-            success:true,
+            success: true,
             user
 
         });
@@ -161,8 +183,8 @@ const getProfileController = async (req, res) => {
 
         res.status(500).json({
 
-            success:false,
-            message:"Internal Server Error"
+            success: false,
+            message: "Internal Server Error"
 
         });
 
@@ -170,68 +192,60 @@ const getProfileController = async (req, res) => {
 
 };
 
-const getAllUsersController = async (req,res)=>{
+// ======================================
+// Admin Controllers
+// ======================================
 
-    try{
+const getAllUsersController = async (req, res) => {
 
-        const users=await getAllUsers();
+    try {
+
+        const users = await getAllUsers();
 
         res.status(200).json({
-            success:true,
-            total:users.length,
+
+            success: true,
             users
+
         });
 
-    }
-
-    catch(error){
+    } catch (error) {
 
         console.log(error);
 
         res.status(500).json({
-            success:false,
-            message:"Internal Server Error"
+
+            success: false,
+            message: "Internal Server Error"
+
         });
 
     }
 
 };
 
-const blockUserController=async(req,res)=>{
+const blockUserController = async (req, res) => {
 
-    try{
+    try {
 
-        const user=await blockUser(req.params.id);
-
-        if(!user){
-
-            return res.status(404).json({
-
-                success:false,
-                message:"User not found"
-
-            });
-
-        }
+        const user = await blockUser(req.params.id);
 
         res.status(200).json({
 
-            success:true,
-            message:"User blocked successfully",
+            success: true,
+            message: "User blocked successfully",
             user
 
         });
 
-    }
-
-    catch(error){
+    } catch (error) {
 
         console.log(error);
 
         res.status(500).json({
 
-            success:false,
-            message:"Internal Server Error"
+            success: false,
+            message: "Internal Server Error"
 
         });
 
@@ -239,41 +253,28 @@ const blockUserController=async(req,res)=>{
 
 };
 
-const unblockUserController=async(req,res)=>{
+const unblockUserController = async (req, res) => {
 
-    try{
+    try {
 
-        const user=await unblockUser(req.params.id);
-
-        if(!user){
-
-            return res.status(404).json({
-
-                success:false,
-                message:"User not found"
-
-            });
-
-        }
+        const user = await unblockUser(req.params.id);
 
         res.status(200).json({
 
-            success:true,
-            message:"User unblocked successfully",
+            success: true,
+            message: "User unblocked successfully",
             user
 
         });
 
-    }
-
-    catch(error){
+    } catch (error) {
 
         console.log(error);
 
         res.status(500).json({
 
-            success:false,
-            message:"Internal Server Error"
+            success: false,
+            message: "Internal Server Error"
 
         });
 
@@ -281,40 +282,28 @@ const unblockUserController=async(req,res)=>{
 
 };
 
-const deleteUserController=async(req,res)=>{
+const deleteUserController = async (req, res) => {
 
-    try{
+    try {
 
-        const user=await deleteUser(req.params.id);
-
-        if(!user){
-
-            return res.status(404).json({
-
-                success:false,
-                message:"User not found"
-
-            });
-
-        }
+        const user = await deleteUser(req.params.id);
 
         res.status(200).json({
 
-            success:true,
-            message:"User deleted successfully"
+            success: true,
+            message: "User deleted successfully",
+            user
 
         });
 
-    }
-
-    catch(error){
+    } catch (error) {
 
         console.log(error);
 
         res.status(500).json({
 
-            success:false,
-            message:"Internal Server Error"
+            success: false,
+            message: "Internal Server Error"
 
         });
 
@@ -322,10 +311,8 @@ const deleteUserController=async(req,res)=>{
 
 };
 
-// ==========================
-// Export Functions
-// ==========================
 module.exports = {
+
     registerUser,
     loginUser,
     getProfileController,
@@ -333,4 +320,5 @@ module.exports = {
     blockUserController,
     unblockUserController,
     deleteUserController
+
 };

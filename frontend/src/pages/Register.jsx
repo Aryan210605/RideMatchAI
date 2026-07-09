@@ -1,39 +1,58 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/Auth.css";
+
 import { registerUser } from "../services/authService";
 
 function Register() {
 
-    const [full_name, setFullName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const navigate = useNavigate();
+
+    const [formData, setFormData] = useState({
+
+        full_name: "",
+        email: "",
+        password: "",
+        role: "rider"
+
+    });
+
+    const handleChange = (e) => {
+
+        setFormData({
+
+            ...formData,
+            [e.target.name]: e.target.value
+
+        });
+
+    };
 
     const handleSubmit = async (e) => {
 
-    e.preventDefault();
+        e.preventDefault();
 
-    try {
+        try {
 
-        const response = await registerUser({
-            full_name,
-            email,
-            password
-        });
+            const response = await registerUser(formData);
 
-        alert(response.data.message);
+            alert(response.data.message);
 
-        setFullName("");
-        setEmail("");
-        setPassword("");
+            navigate("/login");
 
-    } catch (error) {
+        } catch (error) {
 
-        alert(
-            error.response?.data?.message ||
-            "Registration Failed"
-        );
+            console.log(error);
 
-    }
+            alert(
+
+                error.response?.data?.message ||
+
+                "Registration Failed"
+
+            );
+
+        }
 
     };
 
@@ -41,33 +60,56 @@ function Register() {
 
         <div className="auth-container">
 
-            <form className="auth-form" onSubmit={handleSubmit}>
+            <form
+                className="auth-form"
+                onSubmit={handleSubmit}
+            >
 
-                <h2>Create Account</h2>
+                <h2>Register</h2>
 
                 <input
                     type="text"
-                    placeholder="Full Name"
-                    value={full_name}
-                    onChange={(e) => setFullName(e.target.value)}
+                    name="full_name"
+                    placeholder="Enter Full Name"
+                    value={formData.full_name}
+                    onChange={handleChange}
+                    required
                 />
 
                 <input
                     type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    name="email"
+                    placeholder="Enter Email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
                 />
 
                 <input
                     type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    name="password"
+                    placeholder="Enter Password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
                 />
 
+                <select
+                    name="role"
+                    value={formData.role}
+                    onChange={handleChange}
+                    className="role-select"
+                >
+                    <option value="rider">🚗 Rider</option>
+                    <option value="driver">🚕 Driver</option>
+                </select>
+
+                
+
                 <button type="submit">
+
                     Register
+
                 </button>
 
             </form>

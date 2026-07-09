@@ -41,3 +41,26 @@
 .auth-form button:hover{
     background:#0b5ed7;
 }
+
+.role-select{
+    width:100%;
+    padding:14px 16px;
+    margin:15px 0;
+    font-size:16px;
+    border:1px solid #dcdcdc;
+    border-radius:8px;
+    outline:none;
+    background:#fff;
+    cursor:pointer;
+    transition:0.3s ease;
+    box-sizing:border-box;
+}
+
+.role-select:hover{
+    border-color:#0d6efd;
+}
+
+.role-select:focus{
+    border-color:#0d6efd;
+    box-shadow:0 0 8px rgba(13,110,253,0.25);
+}

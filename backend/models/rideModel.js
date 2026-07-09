@@ -157,6 +157,25 @@ const reduceAvailableSeats = async (ride_id, seats_booked) => {
 
 };
 
+const getDriverStatistics = async (driverId) => {
+
+    const result = await pool.query(
+
+        `SELECT
+            COUNT(*) AS total_rides,
+            COALESCE(SUM(fare),0) AS total_fare,
+            COALESCE(SUM(available_seats),0) AS seats_left
+         FROM rides
+         WHERE rider_id = $1`,
+
+        [driverId]
+
+    );
+
+    return result.rows[0];
+
+};
+
 
 module.exports = {
     createRide,
@@ -165,5 +184,6 @@ module.exports = {
     updateRide,
     deleteRide,
     reduceAvailableSeats,
-    searchRides
+    searchRides,
+    getDriverStatistics
 };

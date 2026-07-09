@@ -1,23 +1,27 @@
 import { useState } from "react";
 import { searchRides } from "../services/rideService";
+import { bookRide } from "../services/bookingService";
 
 function SearchRide() {
 
-    const [formData, setFormData] = useState({
+    const [search, setSearch] = useState({
+
         pickup_location: "",
         destination: "",
         ride_date: "",
         seats: 1
+
     });
 
     const [rides, setRides] = useState([]);
-    const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
 
-        setFormData({
-            ...formData,
+        setSearch({
+
+            ...search,
             [e.target.name]: e.target.value
+
         });
 
     };
@@ -28,26 +32,68 @@ function SearchRide() {
 
         try {
 
-            setLoading(true);
+            const response = await searchRides(
 
-            const response = await searchRides(formData);
+                search.pickup_location,
+                search.destination,
+                search.ride_date,
+                search.seats
 
-            setRides(response.data.rides || []);
+            );
+
+            setRides(response.data.rides);
 
         } catch (error) {
 
-            console.log(error);
-
             alert(
+
                 error.response?.data?.message ||
-                "Failed to search rides"
+                "No rides found"
+
             );
 
-            setRides([]);
+        }
 
-        } finally {
+    };
 
-            setLoading(false);
+    const handleBookRide = async (rideId) => {
+
+        const seats = prompt("Enter number of seats:");
+
+        if (!seats) return;
+
+        try {
+
+            const response = await bookRide(
+
+                rideId,
+                Number(seats)
+
+            );
+
+            alert(response.data.message);
+
+            // Refresh search result
+
+            const updated = await searchRides(
+
+                search.pickup_location,
+                search.destination,
+                search.ride_date,
+                search.seats
+
+            );
+
+            setRides(updated.data.rides);
+
+        } catch (error) {
+
+            alert(
+
+                error.response?.data?.message ||
+                "Booking failed"
+
+            );
 
         }
 
@@ -64,10 +110,8 @@ function SearchRide() {
                 <input
                     type="text"
                     name="pickup_location"
-                    placeholder="Pickup Location"
-                    value={formData.pickup_location}
+                    placeholder="Pickup"
                     onChange={handleChange}
-                    required
                 />
 
                 <br /><br />
@@ -76,9 +120,7 @@ function SearchRide() {
                     type="text"
                     name="destination"
                     placeholder="Destination"
-                    value={formData.destination}
                     onChange={handleChange}
-                    required
                 />
 
                 <br /><br />
@@ -86,9 +128,7 @@ function SearchRide() {
                 <input
                     type="date"
                     name="ride_date"
-                    value={formData.ride_date}
                     onChange={handleChange}
-                    required
                 />
 
                 <br /><br />
@@ -96,17 +136,15 @@ function SearchRide() {
                 <input
                     type="number"
                     name="seats"
-                    min="1"
-                    value={formData.seats}
+                    value={search.seats}
                     onChange={handleChange}
-                    required
                 />
 
                 <br /><br />
 
                 <button type="submit">
 
-                    {loading ? "Searching..." : "Search Ride"}
+                    Search
 
                 </button>
 
@@ -116,47 +154,69 @@ function SearchRide() {
 
             {
 
-                rides.length === 0 ? (
+                rides.map((ride) => (
 
-                    <p>No rides found.</p>
+                    <div
+                        key={ride.id}
+                        style={{
+                            border: "1px solid gray",
+                            marginBottom: "15px",
+                            padding: "15px"
+                        }}
+                    >
 
-                ) : (
+                        <h3>
 
-                    rides.map((ride) => (
+                            {ride.pickup_location}
+                            {" → "}
+                            {ride.destination}
 
-                        <div
-                            key={ride.id}
-                            style={{
-                                border: "1px solid #ccc",
-                                padding: "15px",
-                                marginBottom: "15px",
-                                borderRadius: "8px"
-                            }}
+                        </h3>
+
+                        <p>
+
+                            Date :
+                            {" "}
+                            {ride.ride_date}
+
+                        </p>
+
+                        <p>
+
+                            Time :
+                            {" "}
+                            {ride.ride_time}
+
+                        </p>
+
+                        <p>
+
+                            Seats :
+                            {" "}
+                            {ride.available_seats}
+
+                        </p>
+
+                        <p>
+
+                            Fare :
+                            ₹{ride.fare}
+
+                        </p>
+
+                        <button
+                            onClick={() =>
+                                handleBookRide(ride.id)
+                            }
                         >
 
-                            <h3>
-                                {ride.pickup_location} → {ride.destination}
-                            </h3>
+                            Book Ride
 
-                            <p>Date: {ride.ride_date}</p>
+                        </button>
 
-                            <p>Time: {ride.ride_time}</p>
+                    </div>
 
-                            <p>Seats: {ride.available_seats}</p>
-
-                            <p>Fare: ₹{ride.fare}</p>
-
-                            <button>
-
-                                Book Ride
-
-                            </button>
-
-                        </div>
-
-                    ))
-
-                )
+                ))
 
             }
 

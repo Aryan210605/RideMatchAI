@@ -7,50 +7,84 @@ const {
     getRideByIdController,
     updateRideController,
     deleteRideController,
-    searchRidesController
+    searchRidesController,
+    getDriverStatisticsController
 } = require("../controllers/rideController");
 
 const { authenticateToken } = require("../middleware/authMiddleware");
+const authorizeRole = require("../middleware/roleMiddleware");
 
-// Create Ride
+// =====================================
+// Create Ride (Driver Only)
+// =====================================
+
 router.post(
     "/create",
     authenticateToken,
+    authorizeRole("driver"),
     createRideController
 );
 
+// =====================================
 // Get All Rides
+// =====================================
+
 router.get(
     "/",
     authenticateToken,
     getAllRidesController
 );
 
+// =====================================
 // Search Rides
+// =====================================
+
 router.get(
     "/search",
     authenticateToken,
     searchRidesController
 );
 
+// =====================================
+// Driver Dashboard Statistics
+// =====================================
+
+router.get(
+    "/driver/stats",
+    authenticateToken,
+    authorizeRole("driver"),
+    getDriverStatisticsController
+);
+
+// =====================================
 // Get Ride By ID
+// =====================================
+
 router.get(
     "/:id",
     authenticateToken,
     getRideByIdController
 );
 
-// Update Ride
+// =====================================
+// Update Ride (Driver Only)
+// =====================================
+
 router.put(
     "/:id",
     authenticateToken,
+    authorizeRole("driver"),
     updateRideController
 );
 
-// Delete Ride
+// =====================================
+// Delete Ride (Driver Only)
+// =====================================
+
 router.delete(
     "/:id",
     authenticateToken,
+    authorizeRole("driver"),
     deleteRideController
 );
 

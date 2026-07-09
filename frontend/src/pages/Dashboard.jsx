@@ -1,103 +1,90 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import API from "../services/api";
-import "../styles/Dashboard.css";
+import { getDriverStatistics } from "../services/rideService";
 
 function Dashboard() {
 
-    const [user, setUser] = useState(null);
+    const [stats, setStats] = useState({
+        total_rides: 0,
+        total_fare: 0,
+        seats_left: 0
+    });
 
     useEffect(() => {
 
-        const fetchProfile = async () => {
-
-            try {
-
-                const response = await API.get("/auth/profile");
-
-                setUser(response.data.user);
-
-            } catch (error) {
-
-                console.log(error);
-
-            }
-
-        };
-
-        fetchProfile();
+        loadStatistics();
 
     }, []);
 
+    const loadStatistics = async () => {
+
+        try {
+
+            const response = await getDriverStatistics();
+
+            setStats(response.data.stats);
+
+        } catch (error) {
+
+            console.log(error);
+
+        }
+
+    };
+
     return (
 
-        <div className="dashboard-container">
+        <div style={{ padding: "30px" }}>
 
-            <h1>Dashboard</h1>
+            <h1>🚗 Driver Dashboard</h1>
 
-            {
-                user ? (
+            <hr />
 
-                    <>
+            <div
+                style={{
+                    display: "flex",
+                    gap: "20px",
+                    marginTop: "30px",
+                    flexWrap: "wrap"
+                }}
+            >
 
-                        <div className="profile-card">
+                <div
+                    style={{
+                        border: "1px solid #ddd",
+                        borderRadius: "10px",
+                        padding: "20px",
+                        width: "250px"
+                    }}
+                >
+                    <h2>Total Rides</h2>
+                    <h1>{stats.total_rides}</h1>
+                </div>
 
-                            <h2>Welcome, {user.full_name}</h2>
+                <div
+                    style={{
+                        border: "1px solid #ddd",
+                        borderRadius: "10px",
+                        padding: "20px",
+                        width: "250px"
+                    }}
+                >
+                    <h2>Total Fare</h2>
+                    <h1>₹{stats.total_fare}</h1>
+                </div>
 
-                            <p>
-                                <strong>Email :</strong> {user.email}
-                            </p>
+                <div
+                    style={{
+                        border: "1px solid #ddd",
+                        borderRadius: "10px",
+                        padding: "20px",
+                        width: "250px"
+                    }}
+                >
+                    <h2>Seats Left</h2>
+                    <h1>{stats.seats_left}</h1>
+                </div>
 
-                            <p>
-                                <strong>Role :</strong> {user.role}
-                            </p>
-
-                        </div>
-
-                        <div className="action-grid">
-
-                            <Link
-                                to="/create-ride"
-                                className="action-card"
-                            >
-                                <h3>🚗 Create Ride</h3>
-                                <p>Create a new ride for passengers.</p>
-                            </Link>
-
-                            <Link
-                                to="/search"
-                                className="action-card"
-                            >
-                                <h3>🔍 Search Ride</h3>
-                                <p>Find rides matching your route.</p>
-                            </Link>
-
-                            <Link
-                                to="/bookings"
-                                className="action-card"
-                            >
-                                <h3>📖 My Bookings</h3>
-                                <p>View all your ride bookings.</p>
-                            </Link>
-
-                            <Link
-                                to="/payments"
-                                className="action-card"
-                            >
-                                <h3>💳 Payments</h3>
-                                <p>Check your payment history.</p>
-                            </Link>
-
-                        </div>
-
-                    </>
-
-                ) : (
-
-                    <h2>Loading...</h2>
-
-                )
-            }
+            </div>
 
         </div>
 

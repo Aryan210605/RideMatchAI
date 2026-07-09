@@ -1,38 +1,33 @@
 const {
     createBooking,
-    getAllBookings,
+    getMyBookings,
     getBookingById,
-    cancelBooking,
-    getBookingsByPassengerId,
-    confirmBooking,
-    adminCancelBooking,
-    adminDeleteBooking
+    cancelBooking
 } = require("../models/bookingModel");
 
 const {
+    getRideById,
     reduceAvailableSeats,
-    getRideById
+    updateRide
 } = require("../models/rideModel");
+
+// ==============================
+// Book Ride
+// ==============================
 
 const createBookingController = async (req, res) => {
 
     try {
 
-        const {
-            ride_id,
-            passenger_id,
-            seats_booked
-        } = req.body;
+        const { ride_id, seats_booked } = req.body;
 
-        if (
-            !ride_id ||
-            !passenger_id ||
-            !seats_booked
-        ) {
+        const passenger_id = req.user.id;
+
+        if (!ride_id || !seats_booked) {
 
             return res.status(400).json({
                 success: false,
-                message: "All fields are required"
+                message: "Ride ID and seats are required"
             });
 
         }
@@ -57,21 +52,23 @@ const createBookingController = async (req, res) => {
 
         }
 
+        await reduceAvailableSeats(
+            ride_id,
+            seats_booked
+        );
+
         const booking = await createBooking(
             ride_id,
             passenger_id,
             seats_booked
         );
 
-        await reduceAvailableSeats(
-            ride_id,
-            seats_booked
-        );
-
         res.status(201).json({
+
             success: true,
-            message: "Booking created successfully",
+            message: "Ride booked successfully",
             booking
+
         });
 
     } catch (error) {
@@ -79,24 +76,34 @@ const createBookingController = async (req, res) => {
         console.log(error);
 
         res.status(500).json({
+
             success: false,
             message: "Internal Server Error"
+
         });
 
     }
 
 };
 
-const getAllBookingsController = async (req, res) => {
+// ==============================
+// My Bookings
+// ==============================
+
+const getMyBookingsController = async (req, res) => {
 
     try {
 
-        const bookings = await getAllBookings();
+        const bookings = await getMyBookings(
+            req.user.id
+        );
 
         res.status(200).json({
+
             success: true,
             total: bookings.length,
             bookings
+
         });
 
     } catch (error) {
@@ -104,15 +111,21 @@ const getAllBookingsController = async (req, res) => {
         console.log(error);
 
         res.status(500).json({
+
             success: false,
             message: "Internal Server Error"
+
         });
 
     }
 
 };
 
-const getBookingByIdController = async (req, res) => {
+// ==============================
+// Cancel Booking
+// ==============================
+
+const cancelBookingController = async (req, res) => {
 
     try {
 
@@ -121,49 +134,55 @@ const getBookingByIdController = async (req, res) => {
         const booking = await getBookingById(id);
 
         if (!booking) {
+
             return res.status(404).json({
+
                 success: false,
                 message: "Booking not found"
+
             });
+
         }
 
-        res.status(200).json({
-            success: true,
-            booking
-        });
+        if (booking.booking_status === "Cancelled") {
 
-    } catch (error) {
+            return res.status(400).json({
 
-        console.log(error);
-
-        res.status(500).json({
-            success: false,
-            message: "Internal Server Error"
-        });
-
-    }
-
-};
-
-const cancelBookingController = async (req, res) => {
-
-    try {
-
-        const { id } = req.params;
-
-        const booking = await cancelBooking(id);
-
-        if (!booking) {
-            return res.status(404).json({
                 success: false,
-                message: "Booking not found"
+                message: "Booking already cancelled"
+
             });
+
         }
 
+        const ride = await getRideById(
+            booking.ride_id
+        );
+
+        await updateRide(
+
+            ride.id,
+
+            ride.pickup_location,
+            ride.destination,
+            ride.ride_date,
+            ride.ride_time,
+
+            ride.available_seats +
+                booking.seats_booked,
+
+            ride.fare
+
+        );
+
+        const cancelled = await cancelBooking(id);
+
         res.status(200).json({
+
             success: true,
             message: "Booking cancelled successfully",
-            booking
+            booking: cancelled
+
         });
 
     } catch (error) {
@@ -171,98 +190,10 @@ const cancelBookingController = async (req, res) => {
         console.log(error);
 
         res.status(500).json({
+
             success: false,
             message: "Internal Server Error"
-        });
 
-    }
-
-};
-
-const getBookingsByPassengerIdController = async (req, res) => {
-
-    try {
-
-        const { id } = req.params;
-
-        const bookings = await getBookingsByPassengerId(id);
-
-        res.status(200).json({
-            success: true,
-            total: bookings.length,
-            bookings
-        });
-
-    } catch (error) {
-
-        console.log(error);
-
-        res.status(500).json({
-            success: false,
-            message: "Internal Server Error"
-        });
-
-    }
-
-};
-
-const adminCancelBookingController = async (req, res) => {
-
-    try {
-
-        const booking = await adminCancelBooking(req.params.id);
-
-        if (!booking) {
-            return res.status(404).json({
-                success: false,
-                message: "Booking not found"
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            message: "Booking cancelled",
-            booking
-        });
-
-    } catch (error) {
-
-        console.log(error);
-
-        res.status(500).json({
-            success: false,
-            message: "Internal Server Error"
-        });
-
-    }
-
-};
-
-const adminDeleteBookingController = async (req, res) => {
-
-    try {
-
-        const booking = await adminDeleteBooking(req.params.id);
-
-        if (!booking) {
-            return res.status(404).json({
-                success: false,
-                message: "Booking not found"
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            message: "Booking deleted"
-        });
-
-    } catch (error) {
-
-        console.log(error);
-
-        res.status(500).json({
-            success: false,
-            message: "Internal Server Error"
         });
 
     }
@@ -270,12 +201,9 @@ const adminDeleteBookingController = async (req, res) => {
 };
 
 module.exports = {
+
     createBookingController,
-    getAllBookingsController,
-    getBookingByIdController,
-    cancelBookingController,
-    getBookingsByPassengerIdController,
-    getAllBookingsController,
-    adminCancelBookingController,
-    adminDeleteBookingController
+    getMyBookingsController,
+    cancelBookingController
+
 };

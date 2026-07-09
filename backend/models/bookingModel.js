@@ -1,5 +1,9 @@
 const pool = require("../database/db");
 
+// ===========================
+// Create Booking
+// ===========================
+
 const createBooking = async (
     ride_id,
     passenger_id,
@@ -7,131 +11,116 @@ const createBooking = async (
 ) => {
 
     const result = await pool.query(
+
         `INSERT INTO bookings
         (
             ride_id,
             passenger_id,
-            seats_booked
+            seats_booked,
+            booking_status,
+            booked_at
         )
 
-        VALUES ($1, $2, $3)
+        VALUES
+        ($1,$2,$3,'Booked',NOW())
 
         RETURNING *`,
+
         [
             ride_id,
             passenger_id,
             seats_booked
         ]
+
     );
 
     return result.rows[0];
+
 };
+
+// ===========================
+// My Bookings
+// ===========================
+
+const getMyBookings = async (
+    passenger_id
+) => {
+
+    const result = await pool.query(
+
+        `SELECT
+            b.*,
+            r.pickup_location,
+            r.destination,
+            r.ride_date,
+            r.ride_time,
+            r.fare
+        FROM bookings b
+
+        JOIN rides r
+        ON b.ride_id = r.id
+
+        WHERE passenger_id=$1
+
+        ORDER BY booked_at DESC`,
+
+        [passenger_id]
+
+    );
+
+    return result.rows;
+
+};
+
+// ===========================
+// Booking By ID
+// ===========================
 
 const getBookingById = async (id) => {
 
     const result = await pool.query(
-        `SELECT * FROM bookings
-         WHERE id = $1`,
+
+        `SELECT *
+        FROM bookings
+        WHERE id=$1`,
+
         [id]
+
     );
 
     return result.rows[0];
 
 };
+
+// ===========================
+// Cancel Booking
+// ===========================
 
 const cancelBooking = async (id) => {
 
     const result = await pool.query(
+
         `UPDATE bookings
-         SET booking_status = 'cancelled'
-         WHERE id = $1
-         RETURNING *`,
-        [id]
-    );
 
-    return result.rows[0];
+        SET booking_status='Cancelled'
 
-};
+        WHERE id=$1
 
-const getBookingsByPassengerId = async (passenger_id) => {
-
-    const result = await pool.query(
-        `SELECT *
-         FROM bookings
-         WHERE passenger_id = $1
-         ORDER BY id ASC`,
-        [passenger_id]
-    );
-
-    return result.rows;
-
-};
-
-const confirmBooking = async (booking_id) => {
-
-    const result = await pool.query(
-        `UPDATE bookings
-         SET booking_status = 'confirmed'
-         WHERE id = $1
-         RETURNING *`,
-        [booking_id]
-    );
-
-    return result.rows[0];
-
-};
-
-const getAllBookings = async () => {
-
-    const result = await pool.query(
-        `SELECT
-            bookings.*,
-            users.full_name,
-            rides.pickup_location,
-            rides.destination
-        FROM bookings
-        JOIN users
-            ON bookings.passenger_id = users.id
-        JOIN rides
-            ON bookings.ride_id = rides.id
-        ORDER BY bookings.booked_at DESC`
-    );
-
-    return result.rows;
-};
-
-const adminCancelBooking = async (id) => {
-
-    const result = await pool.query(
-        `UPDATE bookings
-        SET booking_status = 'cancelled'
-        WHERE id = $1
         RETURNING *`,
+
         [id]
+
     );
 
     return result.rows[0];
-};
 
-const adminDeleteBooking = async (id) => {
-
-    const result = await pool.query(
-        `DELETE FROM bookings
-        WHERE id = $1
-        RETURNING *`,
-        [id]
-    );
-
-    return result.rows[0];
 };
 
 module.exports = {
+
     createBooking,
+    getMyBookings,
     getBookingById,
-    getBookingsByPassengerId,
-    cancelBooking,
-    confirmBooking,
-    getAllBookings,
-    adminCancelBooking,
-    adminDeleteBooking
+    cancelBooking
+
 };
