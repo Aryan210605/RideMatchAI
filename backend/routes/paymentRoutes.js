@@ -2,36 +2,32 @@ const express = require("express");
 const router = express.Router();
 
 const {
-    createOrderController,
-    verifyPaymentController,
-    getPaymentHistoryController,
-    getUserPaymentsController
+    createPaymentController,
+    getMyPaymentsController
 } = require("../controllers/paymentController");
 
-const { authenticateToken } = require("../middleware/authMiddleware");
+const {
+    authenticateToken
+} = require("../middleware/authMiddleware");
+
+// ==========================
+// Create Payment
+// ==========================
 
 router.post(
-    "/create-order",
+    "/pay",
     authenticateToken,
-    createOrderController
+    createPaymentController
 );
 
-router.post(
-    "/verify",
-    authenticateToken,
-    verifyPaymentController
-);
+// ==========================
+// My Payments
+// ==========================
 
 router.get(
-    "/history/:booking_id",
+    "/my",
     authenticateToken,
-    getPaymentHistoryController
-);
-
-router.get(
-    "/my-payments",
-    authenticateToken,
-    getUserPaymentsController
+    getMyPaymentsController
 );
 
 module.exports = router;

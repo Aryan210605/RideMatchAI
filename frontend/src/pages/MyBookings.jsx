@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
+
 import {
     getMyBookings,
     cancelBooking
 } from "../services/bookingService";
 
+import {
+    createPayment
+} from "../services/paymentService";
+
 function MyBookings() {
 
     const [bookings, setBookings] = useState([]);
+
+    useEffect(() => {
+
+        loadBookings();
+
+    }, []);
 
     const loadBookings = async () => {
 
@@ -20,15 +31,14 @@ function MyBookings() {
 
             console.log(error);
 
+            alert(
+                error.response?.data?.message ||
+                "Failed to load bookings"
+            );
+
         }
 
     };
-
-    useEffect(() => {
-
-        loadBookings();
-
-    }, []);
 
     const handleCancel = async (id) => {
 
@@ -42,11 +52,34 @@ function MyBookings() {
 
         } catch (error) {
 
+            console.log(error);
+
             alert(
-
                 error.response?.data?.message ||
-                "Failed to cancel booking"
+                "Cancel Failed"
+            );
 
+        }
+
+    };
+
+    const handlePayment = async (bookingId) => {
+
+        try {
+
+            const response = await createPayment(bookingId);
+
+            alert(response.data.message);
+
+            loadBookings();
+
+        } catch (error) {
+
+            console.log(error);
+
+            alert(
+                error.response?.data?.message ||
+                "Payment Failed"
             );
 
         }
@@ -65,115 +98,135 @@ function MyBookings() {
 
                 bookings.length === 0 ?
 
-                (
+                    (
 
-                    <h3>No bookings available.</h3>
+                        <h3>No Bookings Found</h3>
 
-                )
+                    )
 
-                :
+                    :
 
-                bookings.map((booking) => (
+                    bookings.map((booking) => (
 
-                    <div
+                        <div
 
-                        key={booking.id}
+                            key={booking.id}
 
-                        style={{
+                            style={{
 
-                            border:"1px solid #ddd",
+                                border: "1px solid #ddd",
 
-                            padding:"20px",
+                                borderRadius: "10px",
 
-                            marginBottom:"20px",
+                                padding: "20px",
 
-                            borderRadius:"10px"
+                                marginBottom: "20px"
 
-                        }}
+                            }}
 
-                    >
+                        >
 
-                        <h3>
+                            <h3>
+                                Booking #{booking.id}
+                            </h3>
 
-                            {booking.pickup_location}
+                            <p>
+                                Ride ID : {booking.ride_id}
+                            </p>
 
-                            {" → "}
+                            <p>
+                                Seats Booked : {booking.seats_booked}
+                            </p>
 
-                            {booking.destination}
+                            <p>
+                                Status : {booking.booking_status}
+                            </p>
 
-                        </h3>
+                            <div
+                                style={{
+                                    display: "flex",
+                                    gap: "10px",
+                                    marginTop: "15px"
+                                }}
+                            >
 
-                        <p>
+                                {
 
-                            Date :
+                                    booking.booking_status === "Booked" && (
 
-                            {" "}
+                                        <button
 
-                            {booking.ride_date}
+                                            onClick={() =>
+                                                handleCancel(booking.id)
+                                            }
 
-                        </p>
+                                            style={{
 
-                        <p>
+                                                padding: "10px 20px",
 
-                            Time :
+                                                background: "#dc3545",
 
-                            {" "}
+                                                color: "white",
 
-                            {booking.ride_time}
+                                                border: "none",
 
-                        </p>
+                                                borderRadius: "5px",
 
-                        <p>
+                                                cursor: "pointer"
 
-                            Seats :
+                                            }}
 
-                            {" "}
+                                        >
 
-                            {booking.seats_booked}
+                                            ❌ Cancel Booking
 
-                        </p>
+                                        </button>
 
-                        <p>
-
-                            Fare :
-
-                            ₹{booking.fare}
-
-                        </p>
-
-                        <p>
-
-                            Status :
-
-                            {booking.booking_status}
-
-                        </p>
-
-                        {
-
-                            booking.booking_status === "Booked"
-
-                            &&
-
-                            <button
-
-                                onClick={()=>
-
-                                    handleCancel(booking.id)
+                                    )
 
                                 }
 
-                            >
+                                {
 
-                                Cancel Booking
+                                    booking.booking_status === "Booked" && (
 
-                            </button>
+                                        <button
 
-                        }
+                                            onClick={() =>
+                                                handlePayment(booking.id)
+                                            }
 
-                    </div>
+                                            style={{
 
-                ))
+                                                padding: "10px 20px",
+
+                                                background: "#0d6efd",
+
+                                                color: "white",
+
+                                                border: "none",
+
+                                                borderRadius: "5px",
+
+                                                cursor: "pointer"
+
+                                            }}
+
+                                        >
+
+                                            💳 Pay Now
+
+                                        </button>
+
+                                    )
+
+                                }
+
+                            </div>
+
+                        </div>
+
+                    ))
 
             }
 

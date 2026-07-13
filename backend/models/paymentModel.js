@@ -1,18 +1,23 @@
 const pool = require("../database/db");
 
-// ==========================
+// ===========================
 // Create Payment
-// ==========================
+// ===========================
+
 const createPayment = async (
     booking_id,
     user_id,
     amount,
-    currency,
-    razorpay_order_id,
-    payment_status
+    currency = "INR",
+    razorpay_order_id = null,
+    razorpay_payment_id = null,
+    razorpay_signature = null,
+    payment_status = "PENDING",
+    payment_method = "RAZORPAY"
 ) => {
 
     const result = await pool.query(
+
         `INSERT INTO payments
         (
             booking_id,
@@ -20,125 +25,107 @@ const createPayment = async (
             amount,
             currency,
             razorpay_order_id,
-            payment_status
+            razorpay_payment_id,
+            razorpay_signature,
+            payment_status,
+            payment_method
         )
+
         VALUES
-        ($1,$2,$3,$4,$5,$6)
+        ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+
         RETURNING *`,
+
         [
             booking_id,
             user_id,
             amount,
             currency,
             razorpay_order_id,
-            payment_status
-        ]
-    );
-
-    return result.rows[0];
-};
-
-// ==========================
-// Update Payment After Success
-// ==========================
-const updatePayment = async (
-    razorpay_order_id,
-    razorpay_payment_id,
-    razorpay_signature,
-    payment_method,
-    payment_status
-) => {
-
-    const result = await pool.query(
-        `UPDATE payments
-        SET
-            razorpay_payment_id = $1,
-            razorpay_signature = $2,
-            payment_method = $3,
-            payment_status = $4
-        WHERE razorpay_order_id = $5
-        RETURNING *`,
-        [
             razorpay_payment_id,
             razorpay_signature,
-            payment_method,
             payment_status,
-            razorpay_order_id
+            payment_method
         ]
+
     );
 
     return result.rows[0];
+
 };
 
-// ==========================
-// Get Payment by Booking ID
-// ==========================
+// ===========================
+// Get My Payments
+// ===========================
+
+const getMyPayments = async (user_id) => {
+
+    const result = await pool.query(
+
+        `SELECT
+            p.id,
+            p.booking_id,
+            p.amount,
+            p.currency,
+            p.payment_status,
+            p.payment_method,
+            p.created_at,
+            b.ride_id,
+            b.seats_booked
+        FROM payments p
+        JOIN bookings b
+            ON p.booking_id = b.id
+        WHERE p.user_id = $1
+        ORDER BY p.id DESC`,
+
+        [user_id]
+
+    );
+
+    return result.rows;
+
+};
+
+// ===========================
+// Get Payment By ID
+// ===========================
+
+const getPaymentById = async (id) => {
+
+    const result = await pool.query(
+
+        `SELECT *
+         FROM payments
+         WHERE id = $1`,
+
+        [id]
+
+    );
+
+    return result.rows[0];
+
+};
+
 const getPaymentByBookingId = async (booking_id) => {
 
     const result = await pool.query(
+
         `SELECT *
          FROM payments
-         WHERE booking_id = $1`,
+         WHERE booking_id = $1
+         AND payment_status = 'SUCCESS'`,
+
         [booking_id]
-    );
 
-    return result.rows;
-};
-
-// ==========================
-// Get Payment by Order ID
-// ==========================
-const getPaymentByOrderId = async (razorpay_order_id) => {
-
-    const result = await pool.query(
-        `SELECT *
-         FROM payments
-         WHERE razorpay_order_id = $1`,
-        [razorpay_order_id]
     );
 
     return result.rows[0];
+
 };
 
-// ==========================
-// Get Payment by Payment ID
-// ==========================
-const getPaymentByPaymentId = async (razorpay_payment_id) => {
-
-    const result = await pool.query(
-        `SELECT *
-         FROM payments
-         WHERE razorpay_payment_id = $1`,
-        [razorpay_payment_id]
-    );
-
-    return result.rows[0];
-};
-
-// ==========================
-// Get All Payments of User
-// ==========================
-const getPaymentsByUserId = async (user_id) => {
-
-    const result = await pool.query(
-        `SELECT *
-         FROM payments
-         WHERE user_id = $1
-         ORDER BY created_at DESC`,
-        [user_id]
-    );
-
-    return result.rows;
-};
-
-// ==========================
-// Export
-// ==========================
 module.exports = {
     createPayment,
-    updatePayment,
-    getPaymentByBookingId,
-    getPaymentByOrderId,
-    getPaymentByPaymentId,
-    getPaymentsByUserId
+    getMyPayments,
+    getPaymentById,
+    getPaymentByBookingId
 };

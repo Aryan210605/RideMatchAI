@@ -42,27 +42,21 @@ const createBooking = async (
 // My Bookings
 // ===========================
 
-const getMyBookings = async (
-    passenger_id
-) => {
+const getMyBookings = async (passenger_id) => {
 
     const result = await pool.query(
 
-        `SELECT
-            b.*,
-            r.pickup_location,
-            r.destination,
-            r.ride_date,
-            r.ride_time,
-            r.fare
-        FROM bookings b
-
-        JOIN rides r
-        ON b.ride_id = r.id
-
-        WHERE passenger_id=$1
-
-        ORDER BY booked_at DESC`,
+        `SELECT b.*
+         FROM bookings b
+         WHERE b.passenger_id = $1
+         AND b.booking_status = 'Booked'
+         AND b.id NOT IN
+         (
+             SELECT booking_id
+             FROM payments
+             WHERE payment_status = 'SUCCESS'
+         )
+         ORDER BY b.id DESC`,
 
         [passenger_id]
 

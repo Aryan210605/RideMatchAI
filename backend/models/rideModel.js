@@ -55,10 +55,7 @@ const getAllRides = async () => {
 const getRideById = async (id) => {
 
     const result = await pool.query(
-        `SELECT * 
-        FROM rides
-        WHERE id = $1
-        LIMIT 1`,
+        `SELECT * FROM rides WHERE id = $1`,
         [id]
     );
 
