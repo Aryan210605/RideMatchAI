@@ -66,6 +66,10 @@ function Navbar() {
                                 Logout
                             </button>
 
+                            <Link to="/my-rides">
+                                🚗 My Rides
+                            </Link>
+
                         </>
 
                     ) : (

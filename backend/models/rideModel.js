@@ -173,6 +173,27 @@ const getDriverStatistics = async (driverId) => {
 
 };
 
+// ===========================
+// Get My Rides
+// ===========================
+
+const getMyRides = async (rider_id) => {
+
+    const result = await pool.query(
+
+        `SELECT *
+         FROM rides
+         WHERE rider_id = $1
+         ORDER BY id DESC`,
+
+        [rider_id]
+
+    );
+
+    return result.rows;
+
+};
+
 
 module.exports = {
     createRide,
@@ -182,5 +203,6 @@ module.exports = {
     deleteRide,
     reduceAvailableSeats,
     searchRides,
-    getDriverStatistics
+    getDriverStatistics,
+    getMyRides
 };

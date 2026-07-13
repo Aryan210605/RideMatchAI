@@ -51,3 +51,12 @@ export const getDriverStatistics = () => {
     return API.get("/rides/driver/stats");
 
 };
+// ==========================
+// Get My Rides
+// ==========================
+
+export const getMyRides = () => {
+
+    return API.get("/rides/my");
+
+};

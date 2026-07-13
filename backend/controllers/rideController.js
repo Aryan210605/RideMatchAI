@@ -6,7 +6,8 @@ const {
     deleteRide,
     reduceAvailableSeats,
     searchRides,
-    getDriverStatistics
+    getDriverStatistics,
+    getMyRides
 } = require("../models/rideModel");
 
 // ==========================
@@ -320,12 +321,46 @@ const getDriverStatisticsController = async (req, res) => {
 
 };
 
+// ===========================
+// Get My Rides
+// ===========================
+
+const getMyRidesController = async (req, res) => {
+
+    try {
+
+        const rides = await getMyRides(req.user.id);
+
+        res.status(200).json({
+
+            success: true,
+            total: rides.length,
+            rides
+
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+
+            success: false,
+            message: "Internal Server Error"
+
+        });
+
+    }
+
+};
+
 module.exports = {
     createRideController,
     getAllRidesController,
     getRideByIdController,
+    searchRidesController,
     updateRideController,
     deleteRideController,
-    searchRidesController,
-    getDriverStatisticsController
+    getDriverStatisticsController,
+    getMyRidesController
 };

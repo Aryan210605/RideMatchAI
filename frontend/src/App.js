@@ -10,6 +10,9 @@ import SearchRide from "./pages/SearchRide";
 import CreateRide from "./pages/CreateRide";
 import MyBookings from "./pages/MyBookings";
 import MyPayments from "./pages/MyPayments";
+import MyRides from "./pages/MyRides";
+import EditRide from "./pages/EditRide";
+
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -29,49 +32,67 @@ function App() {
                 <Route path="/register" element={<Register />} />
 
                 <Route
-    path="/dashboard"
-    element={
-        <ProtectedRoute>
-            <Dashboard />
-        </ProtectedRoute>
-    }
-/>
+                    path="/dashboard"
+                    element={
+                        <ProtectedRoute>
+                            <Dashboard />
+                        </ProtectedRoute>
+                    }
+                />
 
-<Route
-    path="/search"
-    element={
-        <ProtectedRoute>
-            <SearchRide />
-        </ProtectedRoute>
-    }
-/>
+                <Route
+                    path="/search"
+                    element={
+                        <ProtectedRoute>
+                            <SearchRide />
+                        </ProtectedRoute>
+                    }
+                />
 
-<Route
-    path="/create-ride"
-    element={
-        <ProtectedRoute>
-            <CreateRide />
-        </ProtectedRoute>
-    }
-/>
+                <Route
+                    path="/create-ride"
+                    element={
+                        <ProtectedRoute>
+                            <CreateRide />
+                        </ProtectedRoute>
+                    }
+                />
 
-<Route
-    path="/bookings"
-    element={
-        <ProtectedRoute>
-            <MyBookings />
-        </ProtectedRoute>
-    }
-/>
+                <Route
+                    path="/bookings"
+                    element={
+                        <ProtectedRoute>
+                            <MyBookings />
+                        </ProtectedRoute>
+                    }
+                />
 
-<Route
-    path="/payments"
-    element={
-        <ProtectedRoute>
-            <MyPayments />
-        </ProtectedRoute>
-    }
-/>
+                <Route
+                    path="/payments"
+                    element={
+                        <ProtectedRoute>
+                            <MyPayments />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/my-rides"
+                    element={
+                        <ProtectedRoute>
+                            <MyRides />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/edit-ride/:id"
+                    element={
+                        <ProtectedRoute>
+                            <CreateRide />
+                        </ProtectedRoute>
+                    }
+                />
 
             </Routes>
 

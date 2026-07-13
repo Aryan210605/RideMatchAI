@@ -5,10 +5,10 @@ const {
     createRideController,
     getAllRidesController,
     getRideByIdController,
+    searchRidesController,
     updateRideController,
     deleteRideController,
-    searchRidesController,
-    getDriverStatisticsController
+    getMyRidesController
 } = require("../controllers/rideController");
 
 const { authenticateToken } = require("../middleware/authMiddleware");
@@ -49,11 +49,17 @@ router.get(
 // Driver Dashboard Statistics
 // =====================================
 
+// router.get(
+//     "/driver/stats",
+//     authenticateToken,
+//     authorizeRole("driver"),
+//     getDriverStatisticsController
+// );
+
 router.get(
-    "/driver/stats",
+    "/my",
     authenticateToken,
-    authorizeRole("driver"),
-    getDriverStatisticsController
+    getMyRidesController
 );
 
 // =====================================
@@ -65,6 +71,8 @@ router.get(
     authenticateToken,
     getRideByIdController
 );
+
+
 
 // =====================================
 // Update Ride (Driver Only)
